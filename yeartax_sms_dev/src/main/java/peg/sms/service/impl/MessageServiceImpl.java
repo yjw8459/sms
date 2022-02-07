@@ -149,7 +149,7 @@ public class MessageServiceImpl implements MessageService{
 	
 	
 	/**
-	 * 예외 처리 핸들러 
+	 * 예외 처리 핸들러 !
 	 * @param e
 	 * @param errCode
 	 * @param errMsg
