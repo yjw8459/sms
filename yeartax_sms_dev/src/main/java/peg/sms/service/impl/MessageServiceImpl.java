@@ -148,6 +148,15 @@ public class MessageServiceImpl implements MessageService{
 	}
 	
 	
+	/**
+	 * 예외 처리 핸들러 
+	 * @param e
+	 * @param errCode
+	 * @param errMsg
+	 * @param resultVO
+	 * @param dataVO
+	 * @param params
+	 */
 	public <T> void exceptionHandler(Exception e, String errCode, String errMsg, ResultVO resultVO, DataVO dataVO, Map<String, T> params) {
 		System.out.println(params.toString());
 		log.info(params.toString());
