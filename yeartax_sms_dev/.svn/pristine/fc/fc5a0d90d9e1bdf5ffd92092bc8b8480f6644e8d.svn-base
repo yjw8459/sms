@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/jdbc  http://www.springframework.org/schema/jdbc/spring-jdbc-4.0.xsd">
+	
+	<bean id="environmentVariablesConfiguration" class="org.jasypt.encryption.pbe.config.EnvironmentStringPBEConfig">  
+        <property name="algorithm" value="PBEWithMD5AndDES" />  
+        <property name="password" value="PEG_JASYPT_PASS" />
+	</bean>
+
+	<bean id="configurationEncryptor" class="org.jasypt.encryption.pbe.StandardPBEStringEncryptor">  
+        <property name="config" ref="environmentVariablesConfiguration" />  
+	</bean> 
+
+    <!-- 환경설정 기본정보를 PjaCoreConfig.properties 에서 참조하도록 propertyConfigurer 설정  -->
+	<bean id="propertyConfigurer" class="org.jasypt.spring31.properties.EncryptablePropertyPlaceholderConfigurer">
+		<constructor-arg ref="configurationEncryptor" />  
+		<property name="locations">
+			<list>
+				<value>classpath:/jf-core/props/core_config.properties</value>
+			</list>
+		</property>
+    </bean>
+
+    
+    <!-- dataSource 설정 : dbcp방식 -->
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="driverClassName" value="${jdbc.oracle.driverClassName}" />
+		<property name="url" value="${jdbc.oracle.url}" />
+		<property name="username" value="${jdbc.oracle.username}" />
+		<property name="password" value="${jdbc.oracle.password}" />
+		<property name="initialSize" value="${jdbc.oracle.initialSize}" />
+		<property name="maxActive" value="${jdbc.oracle.maxActive}" />
+		<property name="minIdle" value="${jdbc.oracle.minIdle}" />
+		<property name="maxWait" value="${jdbc.oracle.maxWait}" />
+		<property name="validationQuery" value="${jdbc.oracle.validationQuery}" />
+		<property name="testWhileIdle" value="true" />
+	</bean>
+	
+	
+	
+</beans>

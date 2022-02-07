@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration>
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+	<Properties>
+		<Property name="log-path">../logs/yeartax_sms</Property>
+	</Properties>
+
+    <Appenders>
+        <Console name="console" target="SYSTEM_OUT">
+            <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss}] %-5p [%t] %-17c{2} (%13F:%L) %m%n" />
+        </Console>
+		<RollingFile name="rollingFile" fileName="${log-path}/yeartax_sms.log" 
+					 filePattern="${log-path}/yeartax_sms.log.%d{yyyyMMddhhmm}">
+			<PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss}] %-5p [%t] %-17c{2} (%13F:%L) %m%n"/>
+			<Policies>
+				<!-- interval(default 1)이므로 1초 간격으로 rolling 수행 --> 
+				<SizeBasedTriggeringPolicy size="50 MB" />
+			</Policies>
+		</RollingFile>
+    </Appenders>
+    
+    <Loggers>
+        <Root level="DEBUG">
+<!--             <AppenderRef ref="console" /> -->
+            <AppenderRef ref="rollingFile" />
+        </Root>
+        <Logger name="java.sql" level="INFO" additivity="false">
+<!--             <AppenderRef ref="console" /> -->
+            <AppenderRef ref="rollingFile" />
+        </Logger>
+        <Logger name="jdbc.sqltiming" level="INFO" additivity="false">
+<!--             <AppenderRef ref="console" /> -->
+            <AppenderRef ref="rollingFile" />
+        </Logger>
+        <Logger name="egovframework" level="INFO" additivity="false">
+<!--             <AppenderRef ref="console" /> -->
+            <AppenderRef ref="rollingFile" />
+        </Logger>
+        <Logger name="org.springframework" level="INFO" additivity="false">
+<!--             <AppenderRef ref="console" /> -->
+            <AppenderRef ref="rollingFile" />
+        </Logger>
+    </Loggers>
+    
+</log4j:configuration>
