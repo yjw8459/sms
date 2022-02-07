@@ -1,5 +1,6 @@
 package peg.sms.web;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import peg.sms.service.MessageService;
+import peg.sms.vo.DataVO;
 import peg.sms.vo.ResultVO;
 
 @Controller
@@ -36,7 +38,7 @@ public class MessageController {
 	
 	@RequestMapping(value="/result", method=RequestMethod.POST)
 	@ResponseBody
-	public ResultVO sendResult(@RequestBody Map<String, String> param) {
+	public ResultVO sendResult(@RequestBody List<DataVO> param) {
 		return messageService.sendResult(param);
 	}
 }

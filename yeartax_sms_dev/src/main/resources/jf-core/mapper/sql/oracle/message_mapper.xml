@@ -83,7 +83,7 @@
 	<!-- 관리 테이블 디테일 -->
 	<insert id="insertSmsDetail">
 		INSERT INTO TGWSMTGT(SMSNO, SMS_SEQ, RECV_TELNO, RECV_NM, ENT_UNO, ENT_DTM)
-					  VALUES(#{smsno}, #{sms_seq}, #{recv_telno}, #{recv_nm}, #{ent_uno}, TO_CHAR(SYSDATE, 'YYYYMMDDHH24MMSS'))
+					  VALUES(#{smsno}, #{sms_seq}, #{telno}, #{dest_name}, #{ent_uno}, TO_CHAR(SYSDATE, 'YYYYMMDDHH24MMSS'))
 	</insert>
 	
 	
@@ -105,8 +105,9 @@
 	</insert>
 	
 	<select id="selectSendResult" resultType="java.util.Map">
-		SELECT RESULT   /* 전송결과 코드 */
-		  ,    RES_DSC  /* 전송결과 내용 */
+		SELECT SMSNO,
+			   RESULT,   /* 전송결과 코드 */
+			   RES_DSC  /* 전송결과 내용 */
 		 FROM 
 		 (
 		SELECT   C.CUST_CD,
@@ -129,8 +130,11 @@
 		                                      WHERE SR.MSG_ID = SD.MSG_ID
 		                                    ) S ON D.SMSNO = S.RESERVED1 AND D.RECV_TELNO = S.PHONE_NUMBER
 		                    LEFT OUTER JOIN P2T_CD_D CD ON (CD.CD_ID = '300' AND CD.CD = nvl(S.RESULT,0) )
-		   WHERE C.SMSNO = #{smsno}
-		     AND C.CUST_CD = #{cust_cd}
+		   WHERE C.SMSNO IN(
+		    <foreach collection="smsnos" item="smsno" separator=",">
+		      #{smsno}
+		      </foreach>
+		      )
 		     AND C.MMS_YN = 'N' 
 		/*SMS 조회*/ 	
 		UNION ALL
@@ -155,13 +159,15 @@
 		                                      WHERE SR.MSG_ID = SD.MSG_ID
 		                                    ) S ON D.SMSNO = S.RESERVED1 AND D.RECV_TELNO = S.PHONE_NUMBER
 		                    LEFT OUTER JOIN P2T_CD_D CD ON (CD.CD_ID = '300' AND CD.CD = nvl(S.RESULT,0) )
-		   WHERE C.SMSNO   = #{smsno}
-		     AND C.CUST_CD = #{cust_cd}
+		   WHERE C.SMSNO IN(
+		    <foreach collection="smsnos" item="smsno" separator=",">
+		      #{smsno}
+		      </foreach>
+		      )
 		     AND C.MMS_YN = 'Y' 
-		     
 		)
-		GROUP BY  RESULT, RES_DSC
-	
+		GROUP BY SMSNO, RESULT, RES_DSC
+		ORDER BY RES_DSC DESC
 	</select>
 	
 	

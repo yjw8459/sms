@@ -1,10 +1,11 @@
 package peg.sms.mapper;
 
 
+import java.util.List;
 import java.util.Map;
 
 import egovframework.rte.psl.dataaccess.mapper.Mapper;
-import egovframework.rte.psl.dataaccess.util.EgovMap;
+import peg.sms.vo.SendResultVO;
 
 @Mapper("messageMapper")
 public interface MessageMapper {
@@ -12,7 +13,7 @@ public interface MessageMapper {
 	public String selectTelNo(String cust_id);
 	public String getToken();
 	public String selectSmsNo();
-	public Map<String, String> selectSendResult(Map<String, String> param);
+	public List<SendResultVO> selectSendResult(Map<String, Object> param);
 	public int insertCustToken(Map<String, String> param);
 	public int insertSmsMaster(Map<String, Object> param);
 	public int insertSmsDetail(Map<String, Object> param);
