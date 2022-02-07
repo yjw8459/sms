@@ -1,0 +1,131 @@
+package peg.sms.service.impl;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.antlr.grammar.v3.ANTLRParser.throwsSpec_return;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
+
+import egovframework.rte.psl.dataaccess.util.EgovMap;
+import jdk.nashorn.internal.parser.JSONParser;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+import peg.sms.mapper.MessageMapper;
+import peg.sms.service.MessageService;
+import peg.sms.vo.DataVO;
+import peg.sms.vo.ResultVO;
+
+@Service("messageService")
+public class MessageServiceImpl implements MessageService{
+
+	@Resource(name="messageMapper")
+	MessageMapper messageMapper;
+	
+	@Override
+	@Transactional
+	public ResultVO token(Map<String, String> param) {
+		ResultVO result = new ResultVO();
+		DataVO data = new DataVO();
+		System.out.println(param);
+		System.out.println(param.toString());
+		try {
+			messageMapper.p2p_appr_no(param);
+			if ( ((String)param.get("an_ret")).length() < 20 ) {
+				throw new IllegalStateException("유효값 검증 실패");
+			}
+			else	data.setToken((String)param.get("an_ret"));
+		} catch (Exception e) {
+			e.printStackTrace();
+			result.setSuccess("no");
+			data.setErrno(String.valueOf(param.get("an_dbcode")));
+			data.setErrtext(param.get("as_dberrtext"));
+		}
+		
+		result.setData(data);
+		return result;
+	}
+
+	@Override
+	@Transactional
+	public ResultVO sendMessage(Map<String, Object> param) {
+		ResultVO result = new ResultVO();
+		DataVO data = new DataVO();
+		try {
+			//프로시저 유효성 검사 
+			messageMapper.p2p_send_appr_no(param);
+			if ( Integer.valueOf((String)param.get("an_ret")) < 0 ) {
+				throw new IllegalStateException("유효값 검증 실패");
+			}
+			
+			//master Insert
+			String smsno = messageMapper.selectSmsNo();
+			String dtm = smsno.substring(0, 14);
+			param.put("smsno", smsno);
+			param.put("snt_dtm", dtm);
+			param.put("rsv_yn", "N");
+			List<Map<String, String>> destList = JsonConvertToListMap((String)param.get("dest_info"));
+			String dest_info = "";
+			messageMapper.insertSmsMaster(param);
+			
+			//Detail Insert
+			for (int i = 0; i < destList.size(); i++) {
+				Map<String, String> map = destList.get(i);
+				String destName = map.get("dest_name");
+				String telNo = map.get("tel_no");
+				dest_info += destName + "^" + telNo;
+				
+				if ( destList.size()-1 != i ) dest_info += "|";
+				
+				param.put("sms_seq", String.valueOf(i+1));
+				param.put("recv_telno", telNo);
+				param.put("recv_nm", destName);
+				messageMapper.insertSmsDetail(param);
+			}
+			
+			//SMS or MMS Insert
+			param.put("dest_info", dest_info);
+			
+			//"N" = SMS, else MMS
+			if ( "N".equals(param.get("mms_yn")) ) 	messageMapper.insertSendSms(param);
+			else 									messageMapper.insertSendMms(param);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			result.setSuccess("no");
+			data.setErrno((String)param.get("an_dbcode"));
+			data.setErrtext((String)param.get("as_dberrtext"));
+		}
+		
+		if ( "yes".equals(result.getSuccess()) ) {
+			data.setSmsno((String)param.get("smsno"));
+			data.setCallback((String)param.get("as_dberrtext"));
+		}
+		result.setData(data);
+		return result;
+	}
+	
+	
+	private <T> Map<String, T> getMap(String key, T value){
+		Map<String, T> result = new HashMap<>();
+		result.put(key, value);
+		return result;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<Map<String, String>> JsonConvertToListMap(String jsonString) throws Exception{
+		ObjectMapper mapper = new ObjectMapper();
+		List<Map<String, String>> destList = mapper.readValue(jsonString, List.class);
+		return destList;
+	}
+	
+	
+}

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="peg.project.sample.service.SampleMapper">
+
+<!--
+ 	*   프로그램명 : SampleMapper 데이터 처리 SQLMAP
+ 	*   작  성  자 : 박진우(jwpark@pegsystem.co.kr)
+ 	*   작  성  일 : 2018.03.21
+ 	*   비      고 : 
+ 	*	Copyright (C) PEGSYSTEM <http://www.pegsystem.co.kr>
+ -->	
+	
+	
+	
+	<!--
+		* 작 성 자 : 박진우(jwpark@pegsystem.co.kr)
+		* 작 성 일 : 2018.03.21
+		* 내    용 : P2T_CD_D 테이블 조회
+		* 파라미터 : 코드이름(cd_nm, VARCHAR2)
+		             사용여부(use_yn, VAHRCHAR2)
+	-->
+	<select id="selectCodeList" resultType="egovMap">
+		<![CDATA[
+		SELECT CD_ID
+			  ,CD
+			  ,CD_NM
+			  ,LANG_SEQ
+			  ,DSC
+			  ,MGT_ITEM
+			  ,RMK
+			  ,USE_YN
+			  ,INQ_ORD
+			  ,ENT_UNO
+			  ,ENT_DTM
+			  ,UPD_UNO
+			  ,UPD_DTM
+		  FROM P2T_CD_D
+		 WHERE CD_NM LIKE '%'||#{cd_nm}||'%'
+		   AND USE_YN LIKE '%'||#{use_yn}||'%' 
+		]]>
+	</select>
+	<select id="selectCodeList2" resultType="egovMap">
+		<![CDATA[
+		SELECT CD_ID
+			  ,CD
+			  ,CD_NM
+			  ,LANG_SEQ
+			  ,DSC
+			  ,MGT_ITEM
+			  ,RMK
+			  ,USE_YN
+			  ,INQ_ORD
+			  ,ENT_UNO
+			  ,ENT_DTM
+			  ,UPD_UNO
+			  ,UPD_DTM
+		  FROM P2T_CD_D
+		 WHERE CD_NM LIKE '%'||#{cd_nm}||'%'
+		   AND USE_YN LIKE '%'||#{use_yn}||'%' 
+		]]>
+	</select>
+
+</mapper>

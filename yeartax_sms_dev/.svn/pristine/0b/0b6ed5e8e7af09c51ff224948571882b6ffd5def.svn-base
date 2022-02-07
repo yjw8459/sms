@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+						http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd">
+
+
+
+	<bean id="commonLogging" class="pegsystem.web.aop.LogAop" />
+	
+	<aop:config>
+        <aop:pointcut id="applyAll" expression="execution(* peg.demo..impl.*Impl.*(..))" />
+        
+	    <!-- aspect id는 logger이고, logAop를 참조함 -->
+	    <aop:aspect id="logger" ref="commonLogging">
+	        <!-- pointcut(핵심 기능)의 id는 commonLog이고, com.aopEx패키지에 있는 모든 클래스에 공통 기능을 적용 -->
+	        <!-- loggerAop()라는 공통 기능을 publicM라는 pointcut에 적용 -->
+	        <aop:around pointcut-ref="applyAll" method="loggerAop"/>
+	    </aop:aspect>
+	</aop:config>
+
+
+
+
+	
+</beans>

@@ -1,0 +1,22 @@
+package peg.sms.vo;
+
+import lombok.Data;
+
+@Data
+public class DataVO {
+	
+	private String token;
+	
+	private String smsno;
+	
+	private String dbcode;
+	
+	private String dberrtext;
+	
+	private String callback;
+	
+	private String errtext;
+	
+	private String errno;
+	
+}
