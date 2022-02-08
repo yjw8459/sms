@@ -1,14 +1,17 @@
 package peg.sms.vo;
 
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
-@Data
-public class ResultVO {
-	private String success;
+//단건 조회
+@Getter
+@Setter
+@ToString
+public class ResultVO extends ResponseVO{
 	private DataVO data;
-	
 	public ResultVO() {
-		this.success = "yes";
+		super("yes");
 	}
 }

@@ -16,6 +16,7 @@ import org.springframework.web.servlet.ModelAndView;
 import peg.sms.service.MessageService;
 import peg.sms.vo.DataVO;
 import peg.sms.vo.ResultVO;
+import peg.sms.vo.ResultsVO;
 
 @Controller
 public class MessageController {
@@ -38,7 +39,7 @@ public class MessageController {
 	
 	@RequestMapping(value="/result", method=RequestMethod.POST)
 	@ResponseBody
-	public ResultVO sendResult(@RequestBody List<DataVO> param) {
+	public ResultsVO sendResult(@RequestBody Map<String, Object> param) {
 		return messageService.sendResult(param);
 	}
 }

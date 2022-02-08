@@ -10,8 +10,4 @@ public class SendResultVO {
 
 	private String smsno;
 	
-	private String res_dsc;
-	
-	private String result;	//전송 갯수
-	
 }

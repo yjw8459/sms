@@ -104,6 +104,7 @@
 						  VALUES(#{msg_id}, #{request_id}, #{schedule_type}, #{subject}, #{msg}, #{now_date}, #{send_date}, #{as_dberrtext}, #{dest_count}, #{dest_info}, #{smsno}, #{sac_no})
 	</insert>
 	
+	
 	<select id="selectSendResult" resultType="java.util.Map">
 		SELECT SMSNO,
 			   RESULT,   /* 전송결과 코드 */
@@ -130,9 +131,67 @@
 		                                      WHERE SR.MSG_ID = SD.MSG_ID
 		                                    ) S ON D.SMSNO = S.RESERVED1 AND D.RECV_TELNO = S.PHONE_NUMBER
 		                    LEFT OUTER JOIN P2T_CD_D CD ON (CD.CD_ID = '300' AND CD.CD = nvl(S.RESULT,0) )
+		   WHERE C.SMSNO = #{smsno}
+		     AND C.MMS_YN = 'N' 
+		/*SMS 조회*/ 	
+		UNION ALL
+		/*MMS 조회*/
+		  SELECT C.CUST_CD,
+		         M.CUST_NM,
+		         M.SNT_TELNO  as CALLBACK,
+		         C.SMSNO,
+		         C.SNT_DTM,
+		         C.SNT_TELNO,
+		         c.SNT_CONT,
+		         C.RSV_YN,
+		         D.RECV_TELNO,
+		         D.RECV_NM,
+		         NVL(S.RESULT,0) AS RESULT,
+		         CD.DSC          AS RES_DSC
+		    FROM TGWSM_M C
+		        JOIN TGWSM_CUST_INFO M on (C.CUST_CD = M.CUST_CD)
+		        JOIN TGWSMTGT D ON (C.SMSNO = D.SMSNO) 
+		                    LEFT OUTER JOIN (SELECT SR.RESERVED1, PHONE_NUMBER, RESULT
+		                                       FROM SDK_MMS_REPORT SR, SDK_MMS_REPORT_DETAIL SD
+		                                      WHERE SR.MSG_ID = SD.MSG_ID
+		                                    ) S ON D.SMSNO = S.RESERVED1 AND D.RECV_TELNO = S.PHONE_NUMBER
+		                    LEFT OUTER JOIN P2T_CD_D CD ON (CD.CD_ID = '300' AND CD.CD = nvl(S.RESULT,0) )
+		   WHERE C.SMSNO C.SMSNO = #{smsno}
+		     AND C.MMS_YN = 'Y' 
+		)
+		GROUP BY SMSNO, RESULT, RES_DSC
+		ORDER BY RES_DSC DESC
+	</select>
+	
+	<select id="selectSendResults" resultType="peg.sms.vo.DataVO">
+		SELECT SMSNO,
+			   RESULT,   /* 전송결과 코드 */
+			   RES_DSC  /* 전송결과 내용 */
+		 FROM 
+		 (
+		SELECT   C.CUST_CD,
+		         M.CUST_NM,
+		         M.SNT_TELNO as CALLBACK,
+		         C.SMSNO,
+		         C.SNT_DTM,
+		         C.SNT_TELNO,
+		         C.SNT_CONT,
+		         C.RSV_YN,
+		         D.RECV_TELNO,
+		         D.RECV_NM,
+		         NVL(S.RESULT,0) AS RESULT,
+		         CD.DSC          AS RES_DSC
+		    FROM TGWSM_M C
+		        JOIN TGWSM_CUST_INFO M on (C.CUST_CD = M.CUST_CD)
+		        JOIN TGWSMTGT D ON (C.SMSNO = D.SMSNO)
+		                    LEFT OUTER JOIN (SELECT SR.RESERVED1, PHONE_NUMBER, RESULT
+		                                       FROM SDK_SMS_REPORT SR, SDK_SMS_REPORT_DETAIL SD
+		                                      WHERE SR.MSG_ID = SD.MSG_ID
+		                                    ) S ON D.SMSNO = S.RESERVED1 AND D.RECV_TELNO = S.PHONE_NUMBER
+		                    LEFT OUTER JOIN P2T_CD_D CD ON (CD.CD_ID = '300' AND CD.CD = nvl(S.RESULT,0) )
 		   WHERE C.SMSNO IN(
-		    <foreach collection="smsnos" item="smsno" separator=",">
-		      #{smsno}
+		    <foreach collection="data" item="item" separator=",">
+		      #{item.smsno}
 		      </foreach>
 		      )
 		     AND C.MMS_YN = 'N' 
@@ -160,8 +219,8 @@
 		                                    ) S ON D.SMSNO = S.RESERVED1 AND D.RECV_TELNO = S.PHONE_NUMBER
 		                    LEFT OUTER JOIN P2T_CD_D CD ON (CD.CD_ID = '300' AND CD.CD = nvl(S.RESULT,0) )
 		   WHERE C.SMSNO IN(
-		    <foreach collection="smsnos" item="smsno" separator=",">
-		      #{smsno}
+		    <foreach collection="data" item="item" separator=",">
+		      #{item.smsno}
 		      </foreach>
 		      )
 		     AND C.MMS_YN = 'Y' 

@@ -1,12 +1,13 @@
 package peg.sms.vo;
 
-import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DataVO {
 	
@@ -26,10 +27,19 @@ public class DataVO {
 	
 	private String errtext;
 	
-	private List<SendResultVO> results;
+	private String resDsc;
+	
+	private String result;	//전송 갯수
 	
 	public void setReturnSmsData(String smsno, String callback) {
 		this.smsno = smsno;
 		this.callback = callback;
+	}
+	
+	
+	public DataVO(String result, String res_dsc, String smsno ) {
+		this.result = result;
+		this.resDsc = res_dsc;
+		this.smsno = smsno;
 	}
 }

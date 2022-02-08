@@ -6,10 +6,11 @@ import java.util.Map;
 import egovframework.rte.psl.dataaccess.util.EgovMap;
 import peg.sms.vo.DataVO;
 import peg.sms.vo.ResultVO;
+import peg.sms.vo.ResultsVO;
 
 public interface MessageService {
 
 	public ResultVO token(Map<String, String> param);
 	public ResultVO sendMessage(Map<String, Object> param);
-	public ResultVO sendResult(List<DataVO> params);
+	public ResultsVO sendResult(Map<String, Object> params);
 }

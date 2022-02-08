@@ -3,6 +3,7 @@ package peg.sms.service.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -15,7 +16,9 @@ import lombok.extern.slf4j.Slf4j;
 import peg.sms.mapper.MessageMapper;
 import peg.sms.service.MessageService;
 import peg.sms.vo.DataVO;
+import peg.sms.vo.ResponseVO;
 import peg.sms.vo.ResultVO;
+import peg.sms.vo.ResultsVO;
 import peg.sms.vo.SendResultVO;
 
 @Slf4j
@@ -123,41 +126,50 @@ public class MessageServiceImpl implements MessageService{
 	 * 전송 결과 조회
 	 */
 	@Override
-	public ResultVO sendResult(List<DataVO> params) {
-		ResultVO result = new ResultVO();
-		DataVO data = new DataVO();
-		List<SendResultVO> sendResult = null;
+	@SuppressWarnings("unchecked")
+	public ResultsVO sendResult(Map<String, Object> params) {
+		ResultsVO results = new ResultsVO();
+		List<DataVO> sendResult = null;
 		try {
-			Map<String, Object> param = new HashMap<>();
-			param.put("smsnos", 
-					params.stream().map(DataVO::getSmsno)
-					.collect(Collectors.toCollection(ArrayList::new))
-					);
-			sendResult = messageMapper.selectSendResult(param);
+			sendResult = messageMapper.selectSendResults(params);
 			
 			if ( sendResult == null ) 
 				throw new IllegalStateException("조회 결과를 찾을 수 없습니다.");
-			
+			else {
+				
+				List<LinkedHashMap<String, String>> dataList = (List<LinkedHashMap<String, String>>)params.get("data");
+				int paramCount = dataList.size();
+				int resultCount = sendResult.size();
+				
+				if ( paramCount != resultCount ) {
+					for (int i = 0; i < paramCount; i++) {
+						boolean check = false;
+						String smsno = dataList.get(i).get("smsno"); //파라미터 smsno
+						for (int j = 0; j < sendResult.size(); j++) {
+							DataVO item = sendResult.get(j);
+							if ( smsno.equals(item.getSmsno()) ) {
+								check = true;
+								break;
+							}
+						}
+						if ( ! check ) {
+							resultCount++;
+							sendResult.add(new DataVO("-1", "결과 조회 실패", smsno));
+						}
+						if ( resultCount == paramCount ) break;	//결과 조회 실패 건을 다 찾을 시 break;
+					}
+				}
+				
+			}
 		} catch (Exception e) {
-			exceptionHandler(e, "-1", e.getMessage(), result, data, new HashMap<String, String>());
+			exceptionHandler(e, "-1", e.getMessage(), results, new DataVO(), new HashMap<String, String>());
 		}
-		
-		data.setResults(sendResult);
-		result.setData(data);
-		return result;
+		results.setReturnData(sendResult, sendResult.size());
+		return results;
 	}
 	
 	
-	/**
-	 * 예외 처리 핸들러 !
-	 * @param e
-	 * @param errCode
-	 * @param errMsg
-	 * @param resultVO
-	 * @param dataVO
-	 * @param params
-	 */
-	public <T> void exceptionHandler(Exception e, String errCode, String errMsg, ResultVO resultVO, DataVO dataVO, Map<String, T> params) {
+	public <T> void exceptionHandler(Exception e, String errCode, String errMsg, ResponseVO resultVO, DataVO dataVO, Map<String, T> params) {
 		System.out.println(params.toString());
 		log.info(params.toString());
 		e.printStackTrace();
